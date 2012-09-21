@@ -171,7 +171,7 @@ yodack_parse_argv_action () {
 
         while [ $# -gt 0 ]; do
                 case "$1" in
-                        "do"|"on"|"at"|"for"|"please")
+                        "do"|"on"|"at"|"for"|"please"|"also"|"then"|"furthermore")
                                 ;;
                         *)
                                 action="$(yodack_arg_strip $1)"
@@ -297,11 +297,13 @@ yodack_parse_argv () {
                 yodack_fatal "Parameters. Give them, you must."
         fi
 
+        if yodack_need_help "$argv"; then
+                usage
+        fi
+
+        argv=$(yodack_parse_argv_archive "${argv}")
+
         while [ ! -z "${argv}" ]; do
-                if yodack_need_help "$argv"; then
-                        usage
-                fi
-                argv=$(yodack_parse_argv_archive "${argv}")
                 argv=$(yodack_parse_argv_action "${argv}")
         done
 }
