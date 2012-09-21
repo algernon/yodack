@@ -295,14 +295,24 @@ yodack_parse_argv () {
 ## --- Verification, signing & upload --- ##
 
 yodack_verify () {
-        dialog --backtitle "Ye Olde Debian Archive Control Kit" \
-               --title "Verify the commands, you must" \
-               --yes-label "Do" \
-               --no-label "Do Not" \
-               --no-collapse \
-               --defaultno \
-               --yesno "$(cat ${yodack_out})" 0 0
-        r=$?
+        if command -v dialog >/dev/null 2>/dev/null; then
+                dialog --backtitle "Ye Olde Debian Archive Control Kit" \
+                       --title "Verify the commands, you must" \
+                       --yes-label "Do" \
+                       --no-label "Do Not" \
+                       --no-collapse \
+                       --defaultno \
+                       --yesno "$(cat ${yodack_out})" 0 0
+                r=$?
+        else
+                whiptail --backtitle "Ye Olde Debian Archive Control Kit" \
+                         --title "Verify the commands, you must" \
+                         --ok-button "Do" \
+                         --cancel-button "Do Not" \
+                         --defaultno \
+                         --yesno "$(cat ${yodack_out})" 0 0
+                r=$?
+        fi
         clear
         return $r
 }
