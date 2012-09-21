@@ -97,7 +97,9 @@ EOF
 }
 
 yodack_add_dm_fingerprint () {
-        if fprs=$(gpg --no-options --keyring /usr/share/keyrings/debian-maintainers.gpg --list-options no-show-photo --fingerprint "$1" 2>/dev/null); then
+        if fprs=$(gpg --no-options --no-default-keyring \
+                      --keyring /usr/share/keyrings/debian-maintainers.gpg \
+                      --list-options no-show-photo --fingerprint "$1" 2>/dev/null); then
                 :
         else
                 yodack_fatal "A known DM permissions to set, you must."
