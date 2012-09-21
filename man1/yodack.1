@@ -41,22 +41,78 @@ apprentices to make their own choices.
 
 .SH "EXAMPLES"
 
-.IP "\fByodack\fR \fIftp-master\fR \fBdm\fR \fIDEADBEEF\fR \fBallow\fR \fIhello\fR \fBdeny\fR \fIgoodbye\fR"
+.IP "\fByodack\fR \fIftp\-master\fR \fBdm\fR \fIDEADBEEF\fR \fBallow\fR \fIhello\fR \fBdeny\fR \fIgoodbye\fR"
 
 In the simplest case, with no filler text, this translates to allowing
 the maintainer identified by the key \fIDEADBEEF\fR to upload the
 package \fIhello\fR, but forbid him from uploading the \fIgoodbye\fR
 package \- all this on the \fIftp\-master\fR archive.
 
-.IP "\fByodack\fR on \fIftp-master\fR for \fBdm\fR \fIDEADBEEF\fR, please \fBallow\fR uploads of \fIhello\fR, but \fBdeny\fR uploading \fIgoodbye\fR."
+.IP "\fByodack\fR on \fIftp\-master\fR for \fBdm\fR \fIDEADBEEF\fR, please \fBallow\fR uploads of \fIhello\fR, but \fBdeny\fR uploading \fIgoodbye\fR."
 
 This does exactly the same as the previous one, but has a few filler
 words littered accross the command line to please master Yodack.
 
-.IP "\fByodack\fR \fIftp-master\fR \fBdm\fR \fIDEADBEEF\fR \fBallow\fR \fIhello\fR \fBdeny\fR \fIgoodbye\fR. \fIsomewhere\-else\fR \fBanother\-action\fR."
+.IP "\fByodack\fR \fIftp\-master\fR \fBdm\fR \fIDEADBEEF\fR \fBallow\fR \fIhello\fR \fBdeny\fR \fIgoodbye\fR. \fIsomewhere\-else\fR \fBanother\-action\fR."
 
 While doing the same as the previous two examples, this one will also
 do \fBanother\-action\fR on the \fIsomewhere\-else\fR archive.
+
+.SH "CONFIGURATION"
+
+Being a master, Yodack takes a fairly unsophistic approach to
+configuration: it simply sources a set of files (see later), which can
+implement new functionalities, in plain old POSIX shell.
+
+In particular, yodack does not, by default, know how to upload the
+signed command files. It relies on the configuration to implement the
+functions that do the actual task. This is done by requiring the
+upload functions to have a specific name, derived from the archive to
+upload to: every non-alphanumeric character in the archive's name gets
+replaced by an underscore, and \fIyodack_upload_to_\fR gets prepended
+to it \- the result will be the function Yodack will attempt to call,
+with the single argument being the full path to the file to upload.
+
+If the function does not exist, Yodack will complain.
+
+For example, to upload to \fIftp\-master.debian.org\fR, one will need
+a function called \fIyodack_upload_to_ftp_master_debian_org\fR, which
+just happens to be implemented by the default configuration file.
+
+.SH "ENVIRONMENT"
+
+.PP
+\fIUSER\fR
+.RS 4
+The \fIUSER\fR environment variable is used to construct the filename
+that will end up being uploaded in the end. The dak side expects files
+in the \fIlogin\fR\-\fI$(date +%s)\fR format, this environment
+variable is used for the first part.
+.RE
+
+.PP
+\fIYODACK_CONF\fR
+.RS 4
+In case one would like to specify an alternate configuration file,
+yodack will also source the file given in this environment variable,
+right after the two standard files \- if it exists.
+.RE
+
+.SH "FILES"
+
+.PP
+\fB/etc/yodack.conf\fR
+.RS 4
+The global configuration file, implementing upload targets available
+for all users.
+.RE
+
+.PP
+\fB~/.yodack.conf\fR
+.RS 4
+Per-user configuration file, where system-wide defaults can be
+overridden, and new upload targets can be implemented.
+.RE
 
 .SH "AUTHOR"
 Yodack is copyright \(co 2012 by Gergely Nagy <algernon@debian.org>.
