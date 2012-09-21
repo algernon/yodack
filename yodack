@@ -181,8 +181,16 @@ yodack_parse_argv_action () {
         fi
 
         case "${action}" in
-                "dm")
+                "dm"|"debian-maintainer")
                         argv="$(yodack_parse_argv_action_dm $@)"
+                        ;;
+                "debian")
+                        if [ "$2" = "maintainer" ]; then
+                                shift
+                                argv="$(yodack_parse_argv_action_dm $@)"
+                        else
+                                argv="$(yodack_parse_argv_action_generic $@)"
+                        fi
                         ;;
                 *)
                         argv="$(yodack_parse_argv_action_generic $@)"
