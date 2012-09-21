@@ -338,7 +338,7 @@ yodack_upload_to () {
 
 ## -- MAIN PROGRAM -- ##
 
-for cfg in "/etc/yodack.conf" "$HOME/.yodack.conf"; do
+for cfg in "/etc/yodack.conf" "$HOME/.yodack.conf" "${YODACK_CONF}"; do
         if [ -e "${cfg}" ]; then
                 . "${cfg}"
         fi
