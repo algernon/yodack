@@ -195,6 +195,7 @@ yodack_parse_argv_action () {
 yodack_parse_argv_action_dm () {
         set -- $@
 
+        shift
         keyid="$(yodack_arg_strip $1)"
         shift
 
