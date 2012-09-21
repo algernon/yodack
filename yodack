@@ -67,7 +67,8 @@ trap yodack_cleanup INT QUIT ABRT
 
 yodack_add_comments () {
         cat >>"${yodack_out}" <<EOF
-# A dak command file this is, great responsibility it has.
+
+# A dak command file this was, great responsibility it has.
 #  - Yodack ${VERSION}
 EOF
 }
@@ -76,8 +77,10 @@ yodack_add_archive () {
         if [ -z "$1" ]; then
                 return
         fi
+        if [ -e "${yodack_out}" ]; then
+                echo >>"${yodack_out}"
+        fi
         cat >>"${yodack_out}" <<EOF
-
 Archive: $1
 
 EOF
@@ -363,9 +366,8 @@ for cfg in "/etc/yodack.conf" "$HOME/.yodack.conf" "${YODACK_CONF}"; do
         fi
 done
 
-yodack_add_comments
-
 yodack_parse_argv "$@"
+yodack_add_comments
 yodack_prettify
 
 if ! yodack_verify; then
