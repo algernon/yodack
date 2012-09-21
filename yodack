@@ -218,7 +218,7 @@ yodack_parse_argv_action_dm () {
                                 ;;
                 esac
                 case "$1" in
-                        "please"|"upload"|"of"|"package"|"but"|"also"|"or"|"packages"|"uploads"|"uploading"|"rights"|"to")
+                        "please"|"upload"|"of"|"package"|"but"|"also"|"or"|"packages"|"uploads"|"uploading"|"rights"|"to"|"permission"|"permissions"|"on")
                                 ;;
                         "allow"|"grant")
                                 allow=1
