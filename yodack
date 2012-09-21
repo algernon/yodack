@@ -1,0 +1,337 @@
+#! /bin/sh -e
+## Ye Olde Debian Archive Control Kit -- a CLI for dak commands
+## Copyright (C) 2012  Gergely Nagy <algernon@debian.org>
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+usage () {
+        if ! man -w yodack >/dev/null 2>/dev/null; then
+                for p in "$(dirname $0)" "$(dirname $(realpath $0 2>/dev/null) 2>/dev/null)"; do
+                        MANPATH="$p"
+                        export MANPATH
+                        if man -w yodack >/dev/null 2>/dev/null; then
+                                break
+                        fi
+                done
+        fi
+        man yodack
+        exit 0
+}
+
+## --- Default file locations --- ##
+
+yodack_dir="$(mktemp -d)"
+yodack_out="${yodack_dir}/${USER}-$(date +%s).tmp"
+yodack_final="${yodack_dir}/${USER}-$(date +%s).dak-commands"
+
+## --- Helpers --- ##
+
+yodack_arg_strip () {
+        echo "$1" | sed -e "s#^[        ,.;]*##g" \
+                        -e "s#[         ,.;]*\$##g"
+}
+
+yodack_fatal () {
+        echo "$@" >&2
+        yodack_cleanup
+        exit 1
+}
+
+yodack_target_sanitise () {
+        echo "$@" | sed -e "s/[^A-Za-z0-9_]/_/g"
+}
+
+yodack_cleanup () {
+        rm -rf "${yodack_dir}"
+}
+
+trap yodack_cleanup 0
+trap yodack_cleanup INT QUIT ABRT
+
+## --- Add stuff to the output --- ##
+
+yodack_add_archive () {
+        if [ -z "$1" ]; then
+                return
+        fi
+        cat >>"${yodack_out}" <<EOF
+
+Archive: $1
+
+EOF
+}
+
+yodack_add_action () {
+        if [ -z "$1" ]; then
+                return
+        fi
+        cat >>"${yodack_out}" <<EOF
+
+Action: $1
+EOF
+}
+
+yodack_add_dm_fingerprint () {
+        if fprs=$(gpg --no-options --keyring /usr/share/keyrings/debian-maintainers.gpg --list-options no-show-photo --fingerprint "$1" 2>/dev/null); then
+                :
+        else
+                yodack_fatal "A known DM permissions to set, you must."
+        fi
+
+        key_count="$(echo "$fprs" | grep -c "^pub")"
+        if [ "${key_count}" -ne 1 ]; then
+                yodack_fatal "A DM describe better, you must. These, I know, choose one wisely:
+
+$fprs"
+        fi
+
+        fpr="$(echo "$fprs" | grep "Key fingerprint =" | sed -e "s,.*Key fingerprint = ,,")"
+
+        cat >>"${yodack_out}" <<EOF
+Fingerprint: $fpr
+EOF
+}
+
+yodack_add_dm_allow () {
+        if [ -z "$1" ]; then
+                return
+        fi
+        cat >>"${yodack_out}" <<EOF
+Allow:$1
+EOF
+}
+
+yodack_add_dm_deny () {
+        if [ -z "$1" ]; then
+                return
+        fi
+        cat >>"${yodack_out}" <<EOF
+Deny:$1
+EOF
+}
+
+yodack_add_section_end () {
+        echo >>"${yodack_out}"
+}
+
+## --- Command line parsing --- ##
+
+yodack_parse_argv_archive () {
+        set -- $@
+
+        while [ $# -gt 0 ]; do
+                case "$1" in
+                        "for"|"at"|"on"|"then"|"also"|"furthermore"|"please"|"do")
+                                ;;
+                        *)
+                                archive="$(yodack_arg_strip $1)"
+                                break
+                                ;;
+                esac
+                shift
+        done
+        if [ -z "${archive}" ]; then
+                yodack_fatal "No archive you give? Yodack nothing can do."
+        fi
+        yodack_add_archive "${archive}"
+
+        shift
+        echo "$@"
+}
+
+yodack_parse_argv_action () {
+        set -- $@
+
+        while [ $# -gt 0 ]; do
+                case "$1" in
+                        "do"|"on"|"at"|"for"|"please")
+                                ;;
+                        *)
+                                action="$(yodack_arg_strip $1)"
+                                break
+                                ;;
+                esac
+                shift
+        done
+
+        if [ -z "${action}" ]; then
+                yodack_fatal "To do what, you tell me, or Yodack no do anything."
+        fi
+        yodack_add_action "${action}"
+
+        shift
+
+        case "${action}" in
+                "dm")
+                        argv="$(yodack_parse_argv_action_dm $@)"
+                        ;;
+                *)
+                        argv="$(yodack_parse_argv_action_generic $@)"
+                        ;;
+        esac
+
+        echo "$argv"
+}
+
+yodack_parse_argv_action_dm () {
+        set -- $@
+
+        keyid="$(yodack_arg_strip $1)"
+        shift
+
+        stop=0
+        allow=0
+        deny=0
+
+        while [ $# -gt 0 ] && [ "$stop" -eq 0 ]; do
+                case "$1" in
+                        *"."|*";")
+                                stop=1
+                                ;;
+                esac
+                case "$1" in
+                        "please"|"upload"|"of"|"package"|"but"|"also"|"or"|"packages"|"uploads"|"uploading"|"rights"|"to")
+                                ;;
+                        "allow"|"grant")
+                                allow=1
+                                deny=0
+                                ;;
+                        "deny"|"disallow"|"forbid")
+                                deny=1
+                                allow=0
+                                ;;
+                        *)
+                                if [ "$allow" -eq 1 ]; then
+                                        allow_list="${allow_list} $(yodack_arg_strip $1)"
+                                elif [ "$deny" -eq 1 ]; then
+                                        deny_list="${deny_list} $(yodack_arg_strip $1)"
+                                else
+                                        yodack_fatal "Confused, I am."
+                                fi
+                                ;;
+                esac
+                shift
+        done
+
+        yodack_add_dm_fingerprint "${keyid}"
+        yodack_add_dm_allow "${allow_list}"
+        yodack_add_dm_deny "${deny_list}"
+        yodack_add_section_end
+
+        echo "$@"
+}
+
+yodack_parse_argv_action_generic () {
+        set -- $@
+
+        yodack_add_action "$1"
+
+        stop=0
+        while [ $# -gt 0 ] && [ "$stop" -eq 0 ]; do
+                case "$1" in
+                        *"."|*";")
+                                stop=1
+                                ;;
+                esac
+                shift
+        done
+        echo "$@"
+}
+
+yodack_need_help () {
+        set -- $@
+
+        while [ $# -gt 0 ]; do
+                case "$1" in
+                        --help|-h|-?|help)
+                                return 0
+                                ;;
+                esac
+                shift
+        done
+        return 1
+}
+
+yodack_parse_argv () {
+        argv="$@"
+
+        if [ -z "${argv}" ]; then
+                yodack_fatal "Parameters. Give them, you must."
+        fi
+
+        while [ ! -z "${argv}" ]; do
+                if yodack_need_help "$argv"; then
+                        usage
+                fi
+                argv=$(yodack_parse_argv_archive "${argv}")
+                argv=$(yodack_parse_argv_action "${argv}")
+        done
+}
+
+## --- Verification, signing & upload --- ##
+
+yodack_verify () {
+        dialog --backtitle "Ye Olde Debian Archive Control Kit" \
+               --title "Verify the commands, you must" \
+               --yes-label "Do" \
+               --no-label "Do Not" \
+               --no-collapse \
+               --defaultno \
+               --yesno "$(cat ${yodack_out})" 0 0
+        r=$?
+        clear
+        return $r
+}
+
+yodack_upload () {
+        archives="$(grep "^Archive: " "${yodack_out}" | sed -e "s,Archive:,,g")"
+        for archive in $archives; do
+                yodack_upload_to "${archive}" "${yodack_final}"
+        done
+}
+
+yodack_sign () {
+        if [ ! -z "$GPG_AGENT_INFO" ]; then
+                if gpg -q --batch -o "${yodack_final}" --clearsign "${yodack_out}" 2>/dev/null; then
+                        return
+                fi
+        fi
+        gpg -q -o "${yodack_final}" --clearsign "${yodack_out}"
+}
+
+yodack_upload_to () {
+        if ! command -v "yodack_upload_to_$(yodack_target_sanitise $1)" >/dev/null 2>/dev/null; then
+                yodack_fatal "Upload to '$1', how to I know not."
+        fi
+        "yodack_upload_to_$(yodack_target_sanitise $1)" "$2"
+}
+
+## -- MAIN PROGRAM -- ##
+
+for cfg in "/etc/yodack.conf" "$HOME/.yodack.conf"; do
+        if [ -e "${cfg}" ]; then
+                . "${cfg}"
+        fi
+done
+
+yodack_parse_argv "$@"
+if ! yodack_verify; then
+        yodack_fatal "Hmm. Disturbance in the archive, I feel."
+fi
+
+yodack_sign
+
+yodack_upload

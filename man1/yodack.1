@@ -1,0 +1,62 @@
+.TH "YODACK" "1" "2012-09-21" "yodack" "Ye Olde Debian Archive Control Kit Manual"
+.ad l
+.nh
+.SH "NAME"
+yodack \- Ye Olde Debian Archive Control Kit
+.SH "SYNOPSIS"
+.BI "yodack at " ftp\-master.debian.org " for dm " example@org " allow upload of package " "this, that" ", but deny uploading " something-else.
+
+.SH "DESCRIPTION"
+Ye Olde Debian Archive Control Kit (or \fByodack\fR for short) is a
+simple tool to assist the young apprentice in commanding the \fIDAK\fR
+side of the archive.
+
+With this tool, one can easily construct command files, as understood
+by the most recent \fIDAK\fRs, and upload them to the appropriate
+place.
+
+.SH "OPTIONS"
+
+\fBYodack\fR understands some limited set of english, but is picky on
+the order. One should start every sentence by telling the tool which
+archive one wants to give commands to, followed by an action to take
+on said archive, then the actions commands.
+
+One can of course issue multiple actions, to multiple archives
+too. Just make sure to finish the sentence with a dot.
+
+As of now, \fBYodack\fR only recognises a single action, and while it
+will not yell when it finds any other, the arguments for any action
+not documented herein are ignored. All actions \- known or not \- will
+end up being sent, however.
+
+.IP "\fBdm\fR \fIkey\-id\fR \fBallow\fR \fIpackages...\fR \fBdeny\fR \fIpackages...\fR"
+Grant or revoke access to a particular Debian Maintainer (identified
+by the \fIkey\-id\fR) on the listed packages.
+
+The maintainer will be looked up in the Debian Maintainer keyring, and
+Yodack will ask for verification - or complain, if there is more than
+one match. Yodack does not like to choose, it wants the young
+apprentices to make their own choices.
+
+.SH "EXAMPLES"
+
+.IP "\fByodack\fR \fIftp-master\fR \fBdm\fR \fIDEADBEEF\fR \fBallow\fR \fIhello\fR \fBdeny\fR \fIgoodbye\fR"
+
+In the simplest case, with no filler text, this translates to allowing
+the maintainer identified by the key \fIDEADBEEF\fR to upload the
+package \fIhello\fR, but forbid him from uploading the \fIgoodbye\fR
+package \- all this on the \fIftp\-master\fR archive.
+
+.IP "\fByodack\fR on \fIftp-master\fR for \fBdm\fR \fIDEADBEEF\fR, please \fBallow\fR uploads of \fIhello\fR, but \fBdeny\fR uploading \fIgoodbye\fR."
+
+This does exactly the same as the previous one, but has a few filler
+words littered accross the command line to please master Yodack.
+
+.IP "\fByodack\fR \fIftp-master\fR \fBdm\fR \fIDEADBEEF\fR \fBallow\fR \fIhello\fR \fBdeny\fR \fIgoodbye\fR. \fIsomewhere\-else\fR \fBanother\-action\fR."
+
+While doing the same as the previous two examples, this one will also
+do \fBanother\-action\fR on the \fIsomewhere\-else\fR archive.
+
+.SH "AUTHOR"
+Yodack is copyright \(co 2012 by Gergely Nagy <algernon@debian.org>.

@@ -1,0 +1,19 @@
+Source: yodack
+Section: utils
+Priority: extra
+Maintainer: Gergely Nagy <algernon@madhouse-project.org>
+Build-Depends: debhelper (>= 9~)
+Standards-Version: 3.9.4
+Vcs-Git: git://git.madhouse-project.org/debian/yodack.git
+Vcs-Browser: http://git.madhouse-project.org/debian/yodack/
+
+Package: yodack
+Architecture: all
+Multi-Arch: foreign
+Depends: ${misc:Depends}, debian-keyring, dialog
+Description: Ye Olde Debian Archive Control Kit
+ Yodack is an opinionated tool who serves a single yet great purpose:
+ to make it easier for the young apprentices to control the DAK side.
+ .
+ Within this package, one will find a simple tool, that translates
+ one's wishes to the language of dak-commands.
