@@ -224,7 +224,7 @@ yodack_parse_argv_action_dm () {
                                 allow=1
                                 deny=0
                                 ;;
-                        "deny"|"disallow"|"forbid")
+                        "deny"|"disallow"|"forbid"|"revoke")
                                 deny=1
                                 allow=0
                                 ;;
