@@ -384,7 +384,7 @@ for cfg in "/etc/yodack.conf" "$HOME/.yodack.conf" "${YODACK_CONF}"; do
 done
 
 yodack_parse_argv "$@"
-yodack_add_comments
+#yodack_add_comments
 yodack_prettify
 
 if ! yodack_verify; then
