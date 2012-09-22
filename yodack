@@ -80,8 +80,17 @@ yodack_add_archive () {
         if [ -e "${yodack_out}" ]; then
                 echo >>"${yodack_out}"
         fi
+
+        m="${DEBEMAIL:-${EMAIL:-${USER}@$(hostname -f)}} "
+        if [ -z "${DEBFULLNAME}" ] && [ -z "${NAME}" ]; then
+                uploader="${m}"
+        else
+                uploader="${DEBFULLNAME:-${NAME}} <${m}>"
+        fi
+
         cat >>"${yodack_out}" <<EOF
 Archive: $1
+Uploader: ${uploader}
 
 EOF
 }
