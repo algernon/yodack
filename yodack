@@ -347,12 +347,16 @@ yodack_prettify () {
 }
 
 yodack_sign () {
+        gpg_params="-q -o ${yodack_final} --clearsign ${yodack_out}"
+        if [ ! -z "${DEBSIGN_KEYID}" ]; then
+                gpg_params="-u ${DEBSIGN_KEYID} ${gpg_params}"
+        fi
         if [ ! -z "$GPG_AGENT_INFO" ]; then
-                if gpg -q --batch -o "${yodack_final}" --clearsign "${yodack_out}" 2>/dev/null; then
+                if gpg --batch ${gpg_params} 2>/dev/null; then
                         return
                 fi
         fi
-        gpg -q -o "${yodack_final}" --clearsign "${yodack_out}"
+        gpg ${gpg_params}
 }
 
 yodack_upload_to () {
