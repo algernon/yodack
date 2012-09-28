@@ -14,6 +14,12 @@ terribly tired, documentation - for now - will have to wait.
 Let it suffice, that the following command does the right thing:
 
 ```sh
+$ yodack ftp-master dm algernon@madhouse allow dh-exec yodack deny eglibc
+```
+
+Or, if one prefers writing verbose, overly polite commands:
+
+```sh
 $ yodack on ftp-master.debian.org, for dm algernon@madhouse, \
          please allow uploading dh-exec, yodack, \
          but disallow uploading eglibc.
