@@ -4,9 +4,9 @@
 .SH "NAME"
 yodack \- Ye Olde Debian Archive Control Kit
 .SH "SYNOPSIS"
-.BI "yodack " ftp\-master " dm " example@org " allow " "this that" " deny " something\-else
+.BI "yodack " ftp\-master " dm " example@org " keyring " keyring.gpg " allow " "this that" " deny " something\-else
 
-.BI "yodack at " ftp\-master " for dm " example@org " allow upload of package " "this, that" ", but deny uploading " something\-else.
+.BI "yodack at " ftp\-master " for dm " example@org " in keyring " keyring.gpg " allow upload of package " "this, that" ", but deny uploading " something\-else.
 
 .SH "DESCRIPTION"
 Ye Olde Debian Archive Control Kit (or \fByodack\fR for short) is a
@@ -36,7 +36,8 @@ end up being sent, however.
 Grant or revoke access to a particular Debian Maintainer (identified
 by the \fIkey\-id\fR) on the listed packages.
 
-The maintainer will be looked up in the Debian Maintainer keyring, and
+The maintainer will be looked up in the Debian Maintainer keyring by default
+if an alternative keyring is specified via the \fBkeyring\fR option, and
 Yodack will ask for verification - or complain, if there is more than
 one match. Yodack does not like to choose, it wants the young
 apprentices to make their own choices.

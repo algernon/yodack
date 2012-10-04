@@ -107,7 +107,7 @@ EOF
 
 yodack_add_dm_fingerprint () {
         if fprs=$(gpg --no-options --no-default-keyring \
-                      --keyring /usr/share/keyrings/debian-maintainers.gpg \
+                      --keyring "$2" \
                       --list-options no-show-photo --fingerprint "$1" 2>/dev/null); then
                 :
         else
@@ -224,6 +224,7 @@ yodack_parse_argv_action_dm () {
         stop=0
         allow=0
         deny=0
+        keyring=/usr/share/keyrings/debian-maintainers.gpg
 
         while [ $# -gt 0 ] && [ "$stop" -eq 0 ]; do
                 case "$1" in
@@ -242,6 +243,10 @@ yodack_parse_argv_action_dm () {
                                 deny=1
                                 allow=0
                                 ;;
+                        "keyring")
+                                keyring="$2"
+                                shift
+                                ;;
                         *)
                                 if [ "$allow" -eq 1 ]; then
                                         allow_list="${allow_list} $(yodack_arg_strip $1)"
@@ -256,7 +261,7 @@ yodack_parse_argv_action_dm () {
         done
 
         yodack_add_action "dm"
-        yodack_add_dm_fingerprint "${keyid}"
+        yodack_add_dm_fingerprint "${keyid}" "${keyring}"
         yodack_add_dm_allow "${allow_list}"
         yodack_add_dm_deny "${deny_list}"
         yodack_add_section_end
