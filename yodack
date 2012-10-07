@@ -392,7 +392,7 @@ yodack_parse_argv "$@"
 #yodack_add_comments
 yodack_prettify
 
-if ! yodack_verify; then
+if [ -z "${YODACK_TEST}" ] && ! yodack_verify; then
         yodack_fatal "Hmm. Disturbance in the archive, I feel."
 fi
 
