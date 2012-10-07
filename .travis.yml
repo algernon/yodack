@@ -1,0 +1,4 @@
+language: shell
+install: sudo apt-get install shunit2 gnupg
+script:
+  - t/test_yodack
