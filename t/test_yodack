@@ -25,6 +25,7 @@ oneTimeSetUp () {
         export YODACK_TEST_FILE="${SHUNIT_TMPDIR}/yodack-result.dak-commands"
         export DEBEMAIL="yodack@example"
         export DEBFULLNAME="Ye Olde Debian Archive Control Kit"
+        export MANWIDTH=80
 
         if [ -z "${YODACK_GNUPGHOME}" ]; then
                 export GNUPGHOME="${SHUNIT_TMPDIR}/gnupg"
@@ -83,8 +84,8 @@ testNoArguments () {
 
 testHelp () {
         install -d "${TEST_SRCDIR}/data/help"
-        MANWIDTH=80 man -l "${TEST_SRCDIR}/../man1/yodack.1" >"${TEST_SRCDIR}/data/help/stdout"
-        MANWIDTH=80 runYODACK "help" 0 help
+        man -l "${TEST_SRCDIR}/../man1/yodack.1" >"${TEST_SRCDIR}/data/help/stdout"
+        runYODACK "help" 0 help
         rm -rf "${TEST_SRCDIR}/data/help"
 }
 
