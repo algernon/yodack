@@ -1,0 +1,25 @@
+# This file is used to generate the GPG keys for the YODACK test suite
+
+# First, lets create our signing key!
+
+Key-Type: DSA
+Key-Length: 512
+Key-Usage: sign
+
+Name-Real: Ye Olde Debian Archive Control Kit
+Name-Email: yodack@example
+
+Expire-Date: 0
+
+# Then, we create a fake DM key
+
+Key-Type: DSA
+Key-Length: 512
+Key-Usage: sign
+
+Name-Real: J. Random Maintainer
+Name-Email: jrm@example
+
+Expire-Date: 0
+
+%commit

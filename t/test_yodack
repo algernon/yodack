@@ -1,0 +1,159 @@
+#! /bin/sh
+## Test suite for YODACK
+## Copyright (C) 2012  Gergely Nagy <algernon@debian.org>
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+TEST_SRCDIR="$(readlink -f "${0%/*}")"
+YODACK_CONF="${TEST_SRCDIR}/data/yodack.test.conf"
+YODACK="$(readlink -f "${TEST_SRCDIR}/../yodack")"
+
+oneTimeSetUp () {
+        export YODACK_CONF
+        export YODACK_TEST=1
+        export YODACK_TEST_FILE="${SHUNIT_TMPDIR}/yodack-result.dak-commands"
+        export DEBEMAIL="yodack@example"
+        export DEBFULLNAME="Ye Olde Debian Archive Control Kit"
+
+        if [ -z "${YODACK_GNUPGHOME}" ]; then
+                export GNUPGHOME="${SHUNIT_TMPDIR}/gnupg"
+
+                install -d -m 0700 "${GNUPGHOME}"
+
+                gpg --quiet --batch --gen-key "${TEST_SRCDIR}/data/gpg.batch" &>/dev/null
+
+                export YODACK_GNUPGHOME="${GNUPGHOME}"
+        else
+                export GNUPGHOME="${YODACK_GNUPGHOME}"
+        fi
+
+        DM_FPR="$(gpg --fingerprint "jrm@example" 2>/dev/null | grep "Key fingerprint =" | sed -e "s,.*Key fingerprint = ,,")"
+        export DM_FPR
+}
+
+setUp () {
+        rm -f "${YODACK_TEST_FILE}"
+}
+
+runYODACK () {
+        local test_name="$1"
+        local exp_retval="$2"
+        shift; shift
+
+        eval "${YODACK} $@" \
+                 > "${SHUNIT_TMPDIR}/${test_name}.stdout" \
+                2> "${SHUNIT_TMPDIR}/${test_name}.stderr"
+        retval=$?
+
+        assertEquals "standard output of: yodack $@\n" \
+                "$(cat "${TEST_SRCDIR}/data/${test_name}/stdout" 2>/dev/null)" \
+                "$(cat "${SHUNIT_TMPDIR}/${test_name}.stdout")"
+        assertEquals "error output of: yodack $@\n" \
+                "$(cat "${TEST_SRCDIR}/data/${test_name}/stderr" 2>/dev/null)" \
+                "$(cat "${SHUNIT_TMPDIR}/${test_name}.stderr")"
+        assertEquals "return value of: yodack $@\n" \
+                $exp_retval $retval
+
+        if [ -e "${TEST_SRCDIR}/${test_name}/dak-commands" ] ||
+           [ -s "${YODACK_TEST_FILE}" ]; then
+                assertEquals "dak commands from: yodack $@\n" \
+                        "$(gpg --decrypt "${YODACK_TEST_FILE}" 2>/dev/null)" \
+                        "$(sed -e "s/@FINGERPRINT@/${DM_FPR}/g" "${TEST_SRCDIR}/data/${test_name}/dak-commands" 2>/dev/null)"
+        fi
+}
+
+# --------------
+# - Core tests -
+# --------------
+
+testNoArguments () {
+        runYODACK "no-arguments" 1
+}
+
+testHelp () {
+        install -d "${TEST_SRCDIR}/data/help"
+        MANWIDTH=80 man -l "${TEST_SRCDIR}/../man1/yodack.1" >"${TEST_SRCDIR}/data/help/stdout"
+        MANWIDTH=80 runYODACK "help" 0 help
+        rm -rf "${TEST_SRCDIR}/data/help"
+}
+
+testArhiveUnknown () {
+        runYODACK "archive-unknown" 1 "unknown-archive"
+}
+
+testArchiveWithoutParams () {
+        runYODACK "archive-without-params" 0 "test-file"
+}
+
+# --------------------
+# - DM related tests -
+# --------------------
+
+runDM () {
+        runYODACK $1 $2 "test-file dm jrm@example keyring \"${GNUPGHOME}/pubring.gpg\" $3"
+}
+
+testDMUnknown () {
+        runYODACK "dm-unknown" 1 \
+                "test-file dm missing@example keyring \"${GNUPGHOME}/pubring.gpg\""
+}
+
+testDMWithoutActions () {
+        runDM "dm-without-action" 0
+}
+
+testDMAllow () {
+        runDM "dm-allow" 0 "allow pkg1"
+}
+
+testDMDeny () {
+        runDM "dm-deny" 0 "deny pkg2"
+}
+
+testDMAllowDeny () {
+        runDM "dm-allow-deny" 0 "allow pkg1 deny pkg2"
+}
+
+testDMPackageWithoutAction () {
+        runDM "dm-package-without-action" 1 "random-package"
+}
+
+# ------------------------
+# - Verbose syntax tests -
+# ------------------------
+
+testVerboseArchive () {
+        runYODACK "verbose-archive" 0 "on test-file"
+}
+
+testVerboseKeyring () {
+        runYODACK "verbose-keyring" 0 "test-file for dm jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\", "
+}
+
+testVerboseDM () {
+        runYODACK "verbose-dm" 0 "on test-file for debian maintainer jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\","
+        runYODACK "verbose-dm" 0 "on test-file for debian-maintainer jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\","
+}
+
+runVerbose () {
+        runYODACK $1 $2 "on test-file for debian maintainer jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\", $3"
+}
+
+testVerboseGrants () {
+        runVerbose "verbose-grants" 0 "please allow uploading package1, but disallow uploading package2"
+        runVerbose "verbose-grants" 0 "please allow upload of package1 but forbid upload rights to package2"
+        runVerbose "verbose-grants" 0 "grant upload rights for package1, but revoke upload rights to package2"
+}
+
+. shunit2
