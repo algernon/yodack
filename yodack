@@ -244,7 +244,7 @@ yodack_parse_argv_action_dm () {
                                 allow=0
                                 ;;
                         "keyring")
-                                keyring="$2"
+                                keyring="$(yodack_arg_strip $2)"
                                 shift
                                 ;;
                         *)
