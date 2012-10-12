@@ -20,17 +20,22 @@ VERSION="0~0"
 set -e
 
 usage () {
+        local found=0
         if ! man -w yodack >/dev/null 2>/dev/null; then
                 for p in "$(dirname $0)" "$(dirname $(realpath $0 2>/dev/null) 2>/dev/null)"; do
                         MANPATH="$p"
                         export MANPATH
                         if man -w yodack >/dev/null 2>/dev/null; then
+                                found=1
                                 break
                         fi
                 done
         fi
-        man yodack
-        exit 0
+        if [ "$found" -ne 1 ]; then
+                exec man -l $(dirname $(realpath $0 2>/dev/null) 2>/dev/null)/yodack.1
+        else
+                exec man yodack
+        fi
 }
 
 ## --- Default file locations --- ##
