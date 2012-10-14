@@ -1,5 +1,7 @@
 language: shell
-install: sudo apt-get install shunit2 gnupg
+install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq shunit2 gnupg
 script:
   - chmod 0700 t/data/travis
   - YODACK_GNUPGHOME="$(pwd)/t/data/travis" t/test_yodack
