@@ -38,6 +38,19 @@ usage () {
         fi
 }
 
+version ()
+{
+        cat << EOF
+$(basename $0) $VERSION
+Copyright (C) 2012 Gergely Nagy <algernon@debian.org>
+License: GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+EOF
+        exit 0
+}
+
+
 ## --- Default file locations --- ##
 
 yodack_dir="$(mktemp -d)"
@@ -321,6 +334,20 @@ yodack_need_help () {
         return 1
 }
 
+yodack_need_version () {
+        set -- $@
+
+        while [ $# -gt 0 ]; do
+                case "$1" in
+                        --version|-v|version)
+                                return 0
+                                ;;
+                esac
+                shift
+        done
+        return 1
+}
+
 yodack_parse_argv () {
         local argv
 
@@ -332,6 +359,10 @@ yodack_parse_argv () {
 
         if yodack_need_help "$argv"; then
                 usage
+        fi
+
+        if yodack_need_version "$argv"; then
+                version
         fi
 
         argv=$(yodack_parse_argv_archive "${argv}")
