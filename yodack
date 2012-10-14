@@ -74,6 +74,8 @@ EOF
 }
 
 yodack_add_archive () {
+        local m uploader
+
         if [ -z "$1" ]; then
                 return
         fi
@@ -106,6 +108,8 @@ EOF
 }
 
 yodack_add_dm_fingerprint () {
+        local fprs key_count fpr
+
         if fprs=$(gpg --no-options --no-default-keyring \
                       --keyring "$2" \
                       --list-options no-show-photo --fingerprint "$1" 2>/dev/null); then
@@ -153,6 +157,8 @@ yodack_add_section_end () {
 ## --- Command line parsing --- ##
 
 yodack_parse_argv_archive () {
+        local archive
+
         set -- $@
 
         while [ $# -gt 0 ]; do
@@ -176,6 +182,8 @@ yodack_parse_argv_archive () {
 }
 
 yodack_parse_argv_action () {
+        local action argv
+
         set -- $@
 
         while [ $# -gt 0 ]; do
@@ -215,6 +223,8 @@ yodack_parse_argv_action () {
 }
 
 yodack_parse_argv_action_dm () {
+        local keyid stop allow deny allow_list deny_list keyring
+
         set -- $@
 
         shift
@@ -270,6 +280,8 @@ yodack_parse_argv_action_dm () {
 }
 
 yodack_parse_argv_action_generic () {
+        local stop action
+
         set -- $@
 
         stop=0
@@ -305,6 +317,8 @@ yodack_need_help () {
 }
 
 yodack_parse_argv () {
+        local argv
+
         argv="$@"
 
         if [ -z "${argv}" ]; then
@@ -325,6 +339,8 @@ yodack_parse_argv () {
 ## --- Verification, signing & upload --- ##
 
 yodack_verify () {
+        local r
+
         if command -v dialog >/dev/null 2>/dev/null; then
                 dialog --backtitle "Ye Olde Debian Archive Control Kit" \
                        --title "Verify the commands, you must" \
@@ -348,6 +364,8 @@ yodack_verify () {
 }
 
 yodack_upload () {
+        local archives
+
         archives="$(grep "^Archive: " "${yodack_out}" | sed -e "s,Archive:,,g")"
         for archive in $archives; do
                 yodack_upload_to "${archive}" "${yodack_final}"
@@ -355,12 +373,16 @@ yodack_upload () {
 }
 
 yodack_prettify () {
+        local t
+
         t="$(mktemp)"
         sed '/./,/^$/!d' < "${yodack_out}" >"${t}"
         mv -f "${t}" "${yodack_out}"
 }
 
 yodack_sign () {
+        local gpg_params
+
         gpg_params="-q -o ${yodack_final} --clearsign ${yodack_out}"
         if [ ! -z "${DEBSIGN_KEYID}" ]; then
                 gpg_params="-u ${DEBSIGN_KEYID} ${gpg_params}"
