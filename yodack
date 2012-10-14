@@ -288,6 +288,10 @@ yodack_parse_argv_action_dm () {
                 shift
         done
 
+        if [ -z "${allow_list}${deny_list}" ]; then
+                yodack_fatal "Confused, I am."
+        fi
+        
         yodack_add_action "dm"
         yodack_add_dm_fingerprint "${keyid}" "${keyring}"
         yodack_add_dm_allow "${allow_list}"

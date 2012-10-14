@@ -89,6 +89,10 @@ testHelp () {
         rm -rf "${TEST_SRCDIR}/data/help"
 }
 
+testIgnoredWordsOnly () {
+        runYODACK "ignored-words-only" 1 "for at then furthermore please do"
+}
+
 testArhiveUnknown () {
         runYODACK "archive-unknown" 1 "unknown-archive"
 }
@@ -105,13 +109,19 @@ runDM () {
         runYODACK $1 $2 "test-file dm jrm@example keyring \"${GNUPGHOME}/pubring.gpg\" $3"
 }
 
-testDMUnknown () {
-        runYODACK "dm-unknown" 1 \
-                "test-file dm missing@example keyring \"${GNUPGHOME}/pubring.gpg\""
+testDMWithoutActions () {
+        runDM "dm-without-action" 1
+        runDM "dm-without-action" 1 "package-name"
 }
 
-testDMWithoutActions () {
-        runDM "dm-without-action" 0
+testDMMultiple () {
+        runYODACK "dm-multiple" 1 \
+                "test-file dm @example keyring \"${GNUPGHOME}/pubring.gpg\" allow a-package"
+}
+
+testDMUnknown () {
+        runYODACK "dm-unknown" 1 \
+                "test-file dm missing@example keyring \"${GNUPGHOME}/pubring.gpg\" allow a-package"
 }
 
 testDMAllow () {
@@ -139,12 +149,12 @@ testVerboseArchive () {
 }
 
 testVerboseKeyring () {
-        runYODACK "verbose-keyring" 0 "test-file for dm jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\", "
+        runYODACK "verbose-keyring" 1 "test-file for dm jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\", "
 }
 
 testVerboseDM () {
-        runYODACK "verbose-dm" 0 "on test-file for debian maintainer jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\","
-        runYODACK "verbose-dm" 0 "on test-file for debian-maintainer jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\","
+        runYODACK "verbose-dm" 1 "on test-file for debian maintainer jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\","
+        runYODACK "verbose-dm" 1 "on test-file for debian-maintainer jrm@example in keyring \"${GNUPGHOME}/pubring.gpg\","
 }
 
 runVerbose () {
