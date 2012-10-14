@@ -87,6 +87,58 @@ For example, to upload to \fIftp\-master.debian.org\fR, one will need
 a function called \fIyodack_upload_to_ftp_master_debian_org\fR, which
 just happens to be implemented by the default configuration file.
 
+.SH "ERRORS"
+
+.IP "\fBA known DM permissions to set, you must\fR"
+
+The debian maintainer given to the \fBdm\fR action was not found,
+possibly due to the \fIdebian\-keyring\fR package being slightly out
+of date. Make sure you have a keyring which contains the key, and
+point yodack to it by using the \fBkeyring\fR argument to the \fBdm\fR
+action.
+
+.IP "\fBA DM describe better, you must. These, I know, choose one wisely:\fR"
+
+Yodack found multiple matches for the \fIkey\fR given to the \fBdm\fR
+action, you will need to be more explicit, so that only one match will
+be found.
+
+.IP "\fBNo archive you give? Yodack nothing can do.\fR"
+
+Unfortunately, whatever sentence you asked Yodack to do, did not
+contain anything Yodack could recognise as an archive \- most likely,
+everything on the command\-line were words yodack normally ignores.
+
+.IP "\fBTo do what, you tell me, or Yodack no do anything.\fR"
+
+No action was given to Yodack, therefore it refuses to read your
+mind. Use any of the actions described above in this manual.
+
+.IP "\fBConfused, I am.\fR"
+
+If you don't give yodack's \fBdm\fR command any package list, yodack
+will be very confused about what you want it to do. One needs to give
+at least one package to allow or disallow uploads of, otherwise the
+\fBdm\fR command is useless.
+
+.IP "\fBParameters. Give them, you must.\fR"
+
+Without any parameters, yodack complains.
+
+.IP "\fBUpload to '<something>', how to I know not."
+
+The archive selected for uploads was not found in the configuration,
+yodack can't upload. Please double check that the archive specified
+has an appropriate upload terget in any of the configuration files
+yodack uses.
+
+.IP "\fBHmm. Disturbance in the archive, I feel."
+
+When presented with the command file to sign, if \fBDo Not\fR is
+selected, yodack will feel slightly disturbed. This is perfectly
+normal, if one really wanted to abort the operation. Otherwise, one
+should select \fBDo\fR.
+
 .SH "ENVIRONMENT"
 
 .PP
