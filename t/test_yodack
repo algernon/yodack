@@ -61,8 +61,8 @@ runYODACK () {
                 "$(cat "${TEST_SRCDIR}/data/${test_name}/stdout" 2>/dev/null)" \
                 "$(cat "${SHUNIT_TMPDIR}/${test_name}.stdout")"
         assertEquals "error output of: yodack $@\n" \
-                "$(cat "${TEST_SRCDIR}/data/${test_name}/stderr" 2>/dev/null)" \
-                "$(cat "${SHUNIT_TMPDIR}/${test_name}.stderr")"
+                "$(head -n 1 "${TEST_SRCDIR}/data/${test_name}/stderr" 2>/dev/null)" \
+                "$(head -n 1 "${SHUNIT_TMPDIR}/${test_name}.stderr")"
         assertEquals "return value of: yodack $@\n" \
                 $exp_retval $retval
 
