@@ -128,7 +128,7 @@ EOF
 yodack_add_dm_fingerprint () {
         local fprs key_count fpr
 
-        if fprs=$(gpg --no-options --no-default-keyring \
+        if fprs=$(LANG=C gpg --no-options --no-default-keyring \
                       --keyring "$2" \
                       --list-options no-show-photo --fingerprint "$1" 2>/dev/null); then
                 :
