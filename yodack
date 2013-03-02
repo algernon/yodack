@@ -1,6 +1,6 @@
 #! /bin/sh -e
 ## Ye Olde Debian Archive Control Kit -- a CLI for dak commands
-## Copyright (C) 2012  Gergely Nagy <algernon@debian.org>
+## Copyright (C) 2012, 2013  Gergely Nagy <algernon@debian.org>
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -129,8 +129,8 @@ yodack_add_dm_fingerprint () {
         local fprs key_count fpr
 
         if fprs=$(LANG=C gpg --no-options --no-default-keyring \
-                      --keyring "$2" \
-                      --list-options no-show-photo --fingerprint "$1" 2>/dev/null); then
+                             --keyring "$2" \
+                             --list-options no-show-photo --fingerprint "$1" 2>/dev/null); then
                 :
         else
                 yodack_fatal "A known DM permissions to set, you must."
