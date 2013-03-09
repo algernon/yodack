@@ -1,6 +1,6 @@
 Ye Olde Debian Archive Control Kit
 ==================================
-  "The only *Kit that does not suck"
+  *"The only *Kit that does not suck"*
 
 Concieved under the influence of black tea, born on a train 4am in the
 morning, Y.O.D.A.C.K. is not your average tool. It has a distinct
