@@ -2,6 +2,8 @@ Ye Olde Debian Archive Control Kit
 ==================================
   *"The only *Kit that does not suck"*
 
+[![Build Status](https://travis-ci.org/algernon/yodack.png?branch=master)](https://travis-ci.org/algernon/yodack)
+
 Concieved under the influence of black tea, born on a train 4am in the
 morning, Y.O.D.A.C.K. is not your average tool. It has a distinct
 personality, and its purpose is to teach, not to do your job. At
